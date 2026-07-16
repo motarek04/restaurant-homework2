@@ -5,6 +5,7 @@ const API_URL = "http://localhost:5001";
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [cart, setCart] = useState(() => {
     try {
@@ -19,7 +20,6 @@ function App() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [orderMessage, setOrderMessage] = useState("");
-
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -49,6 +49,10 @@ function App() {
     localStorage.setItem("mosRestaurantCart", JSON.stringify(cart));
   }, [cart]);
 
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
   function addToCart(item) {
     if (!item.available) {
       setOrderMessage(`${item.name} is currently unavailable.`);
@@ -65,10 +69,7 @@ function App() {
       if (existingItem) {
         return currentCart.map((cartItem) =>
           cartItem._id === item._id
-            ? {
-                ...cartItem,
-                quantity: cartItem.quantity + 1,
-              }
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         );
       }
@@ -81,10 +82,7 @@ function App() {
     setCart((currentCart) =>
       currentCart.map((item) =>
         item._id === id
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
+          ? { ...item, quantity: item.quantity + 1 }
           : item
       )
     );
@@ -95,10 +93,7 @@ function App() {
       currentCart
         .map((item) =>
           item._id === id
-            ? {
-                ...item,
-                quantity: item.quantity - 1,
-              }
+            ? { ...item, quantity: item.quantity - 1 }
             : item
         )
         .filter((item) => item.quantity > 0)
@@ -204,20 +199,38 @@ function App() {
       <nav className="navbar">
         <h2>Mo&apos;s Restaurant</h2>
 
-        <div className="nav-links">
-          <a href="#home">Home</a>
-          <a href="#menu">Menu</a>
-          <a href="#gallery">Gallery</a>
-          <a href="#about">About</a>
-          <a href="#cart">Cart ({cartCount})</a>
-          <a href="#contact">Contact</a>
+        <div className="nav-actions">
+          <a
+            href="#cart"
+            className="cart-link"
+            aria-label={`Shopping cart with ${cartCount} items`}
+          >
+            🛒 <span>{cartCount}</span>
+          </a>
+
+          <button
+            type="button"
+            className="menu-toggle"
+            aria-label="Toggle navigation menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((current) => !current)}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        </div>
+
+        <div className={`nav-links ${menuOpen ? "nav-links-open" : ""}`}>
+          <a href="#home" onClick={closeMenu}>Home</a>
+          <a href="#menu" onClick={closeMenu}>Menu</a>
+          <a href="#gallery" onClick={closeMenu}>Gallery</a>
+          <a href="#about" onClick={closeMenu}>About</a>
+          <a href="#contact" onClick={closeMenu}>Contact</a>
         </div>
       </nav>
 
       <header id="home" className="hero">
         <h1>🍽️ Mo&apos;s Restaurant</h1>
         <p>Fresh Food • Great Taste • Fast Service</p>
-
         <a href="#menu" className="hero-btn">
           Order Now
         </a>
@@ -231,9 +244,7 @@ function App() {
             type="text"
             placeholder="Search menu..."
             value={searchTerm}
-            onChange={(event) =>
-              setSearchTerm(event.target.value)
-            }
+            onChange={(event) => setSearchTerm(event.target.value)}
           />
 
           <div className="category-filters">
@@ -246,9 +257,7 @@ function App() {
                     ? "active-filter"
                     : ""
                 }
-                onClick={() =>
-                  setSelectedCategory(category)
-                }
+                onClick={() => setSelectedCategory(category)}
               >
                 {category}
               </button>
@@ -265,26 +274,19 @@ function App() {
             {filteredMenuItems.map((item) => (
               <div className="card" key={item._id}>
                 {item.image && (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                  />
+                  <img src={item.image} alt={item.name} />
                 )}
 
                 <h3>{item.name}</h3>
                 <p>{item.description}</p>
-                <h4>
-                  ${Number(item.price).toFixed(2)}
-                </h4>
+                <h4>${Number(item.price).toFixed(2)}</h4>
 
                 <button
                   type="button"
                   onClick={() => addToCart(item)}
                   disabled={!item.available}
                 >
-                  {item.available
-                    ? "Add to Cart"
-                    : "Unavailable"}
+                  {item.available ? "Add to Cart" : "Unavailable"}
                 </button>
               </div>
             ))}
@@ -312,17 +314,14 @@ function App() {
         <h2>About Us</h2>
 
         <p className="about-text">
-          Mo&apos;s Restaurant was created to serve fresh and
-          tasty meals in a welcoming place. Our menu includes
-          burgers, pizza, pasta, salads, desserts, drinks, and
-          more. We believe good food brings people together.
+          Mo&apos;s Restaurant was created to serve fresh and tasty meals
+          in a welcoming place. Our menu includes burgers, pizza, pasta,
+          salads, desserts, drinks, and more. We believe good food brings
+          people together.
         </p>
       </section>
 
-      <section
-        id="cart"
-        className="section cart-section"
-      >
+      <section id="cart" className="section cart-section">
         <h2>Shopping Cart</h2>
 
         {cart.length === 0 ? (
@@ -330,28 +329,18 @@ function App() {
         ) : (
           <>
             {cart.map((item) => (
-              <div
-                className="cart-item"
-                key={item._id}
-              >
+              <div className="cart-item" key={item._id}>
                 <div>
                   <strong>{item.name}</strong>
-
                   <p>
-                    $
-                    {(
-                      Number(item.price) *
-                      item.quantity
-                    ).toFixed(2)}
+                    ${(Number(item.price) * item.quantity).toFixed(2)}
                   </p>
                 </div>
 
                 <div className="quantity-controls">
                   <button
                     type="button"
-                    onClick={() =>
-                      decreaseQuantity(item._id)
-                    }
+                    onClick={() => decreaseQuantity(item._id)}
                   >
                     −
                   </button>
@@ -360,9 +349,7 @@ function App() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      increaseQuantity(item._id)
-                    }
+                    onClick={() => increaseQuantity(item._id)}
                   >
                     +
                   </button>
@@ -370,9 +357,7 @@ function App() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    removeFromCart(item._id)
-                  }
+                  onClick={() => removeFromCart(item._id)}
                 >
                   Remove
                 </button>
@@ -381,10 +366,7 @@ function App() {
 
             <h3>Total: ${total.toFixed(2)}</h3>
 
-            <form
-              className="checkout-form"
-              onSubmit={placeOrder}
-            >
+            <form className="checkout-form" onSubmit={placeOrder}>
               <input
                 type="text"
                 placeholder="Customer name"
@@ -405,9 +387,7 @@ function App() {
                 required
               />
 
-              <button type="submit">
-                Place Order
-              </button>
+              <button type="submit">Place Order</button>
             </form>
 
             <button
@@ -421,39 +401,19 @@ function App() {
         )}
 
         {orderMessage && (
-          <p className="order-message">
-            {orderMessage}
-          </p>
+          <p className="order-message">{orderMessage}</p>
         )}
       </section>
 
-      <section
-        id="contact"
-        className="section contact"
-      >
+      <section id="contact" className="section contact">
         <h2>Contact Us</h2>
 
         <div className="contact-box">
-          <form
-            onSubmit={(event) =>
-              event.preventDefault()
-            }
-          >
-            <input
-              type="text"
-              placeholder="Name"
-            />
-
-            <input
-              type="email"
-              placeholder="Email"
-            />
-
+          <form onSubmit={(event) => event.preventDefault()}>
+            <input type="text" placeholder="Name" />
+            <input type="email" placeholder="Email" />
             <textarea placeholder="Message"></textarea>
-
-            <button type="submit">
-              Send Message
-            </button>
+            <button type="submit">Send Message</button>
           </form>
 
           <iframe
@@ -465,9 +425,7 @@ function App() {
 
       <footer>
         <h3>Mo&apos;s Restaurant</h3>
-        <p>
-          Hours: Monday - Sunday | 10 AM - 10 PM
-        </p>
+        <p>Hours: Monday - Sunday | 10 AM - 10 PM</p>
         <p>Facebook | Instagram | TikTok</p>
         <p>© 2026 Mo&apos;s Restaurant</p>
       </footer>

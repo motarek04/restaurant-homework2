@@ -65,6 +65,27 @@ function Admin() {
     (order) => order.status === "Pending"
   ).length;
 
+  const completedOrders = orders.filter(
+    (order) => order.status === "Completed"
+  ).length;
+
+  const cancelledOrders = orders.filter(
+    (order) => order.status === "Cancelled"
+  ).length;
+
+  const itemCounts = {};
+
+  orders.forEach((order) => {
+    order.items.forEach((item) => {
+      itemCounts[item.name] =
+        (itemCounts[item.name] || 0) + item.quantity;
+    });
+  });
+
+  const mostOrderedItem =
+    Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+    "No orders yet";
+
   async function handleMenuSubmit(event) {
     event.preventDefault();
     setMessage("");
@@ -145,7 +166,9 @@ function Admin() {
       "Are you sure you want to delete this menu item?"
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/api/menu/${menuItemId}`, {
@@ -193,7 +216,9 @@ function Admin() {
       "Are you sure you want to delete this order?"
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
@@ -254,6 +279,30 @@ function Admin() {
           <div>
             <p>Pending Orders</p>
             <h2>{pendingOrders}</h2>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <span className="stat-icon">✅</span>
+          <div>
+            <p>Completed Orders</p>
+            <h2>{completedOrders}</h2>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <span className="stat-icon">❌</span>
+          <div>
+            <p>Cancelled Orders</p>
+            <h2>{cancelledOrders}</h2>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <span className="stat-icon">🔥</span>
+          <div>
+            <p>Most Ordered Item</p>
+            <h2 className="best-seller-name">{mostOrderedItem}</h2>
           </div>
         </div>
       </section>
@@ -416,9 +465,7 @@ function Admin() {
                   ))}
                 </div>
 
-                <strong>
-                  Total: ${Number(order.total).toFixed(2)}
-                </strong>
+                <strong>Total: ${Number(order.total).toFixed(2)}</strong>
 
                 <select
                   value={order.status}

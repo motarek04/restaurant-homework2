@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./Admin.css";
 
-const API_URL = "http://localhost:5001";
+const API_URL = "https://restaurant-homework2.onrender.com";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80";
